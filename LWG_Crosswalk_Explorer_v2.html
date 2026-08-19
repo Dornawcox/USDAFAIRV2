@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LWG Crosswalk Explorer v2 — Strafford County FY27</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Public+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --paper2:#F2EDE1; --ink:#26312B; --ink-soft:#5A655D;
+    --spruce:#2E5E43; --spruce-deep:#1F4230;
+    --p-red:#C6402E; --s-green:#4C8B3B; --kraft:#C9A227; --tape:#D8C49A;
+    --line:#DDD5C4; --dot-gold:#C9A227;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--paper); color:var(--ink); font-family:'Public Sans',system-ui,sans-serif; font-size:15px; line-height:1.55;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  header{background:var(--spruce-deep); color:#F4F1E4; padding:34px 20px 0;}
+  .mast{max-width:1100px; margin:0 auto;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--tape); margin-bottom:10px;}
+  h1{font-family:'Fraunces',serif; font-weight:900; font-size:clamp(26px,4.6vw,44px); line-height:1.08; max-width:780px;}
+  h1 em{font-style:italic; color:#9FD3AE;}
+  .mast p.lede{max-width:700px; margin:14px 0 22px; color:#CDDCCB; font-size:15px;}
+  .legend{display:flex; gap:18px; flex-wrap:wrap; padding-bottom:18px; font-size:12.5px; color:#CDDCCB;}
+  .legend .dot{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; font-weight:700; font-size:11px; color:#fff; margin-right:6px; vertical-align:middle;}
+  .dot.p{background:var(--p-red);} .dot.s{background:var(--s-green);} .dot.g{background:var(--dot-gold);}
+
+  nav{display:flex; gap:0; max-width:1100px; margin:0 auto; overflow-x:auto;}
+  nav button{appearance:none; border:none; background:transparent; color:#B9CBB8; font-family:'Public Sans'; font-weight:600; font-size:13.5px; padding:12px 16px; cursor:pointer; border-top-left-radius:8px; border-top-right-radius:8px; white-space:nowrap;}
+  nav button:hover{color:#fff;}
+  nav button[aria-selected="true"]{background:var(--paper); color:var(--spruce-deep);}
+  nav button:focus-visible{outline:2px solid var(--kraft); outline-offset:-2px;}
+
+  main{max-width:1100px; margin:0 auto; padding:28px 20px 80px;}
+  section[hidden]{display:none;}
+  h2{font-family:'Fraunces',serif; font-weight:600; font-size:24px; margin-bottom:6px;}
+  .sub{color:var(--ink-soft); margin-bottom:22px; max-width:740px;}
+
+  /* tier bands & cards */
+  .tierband{display:flex; align-items:baseline; gap:12px; margin:30px 0 12px; border-bottom:2px solid var(--ink); padding-bottom:6px;}
+  .tierband .tno{font-family:'Fraunces',serif; font-weight:900; font-size:30px; color:var(--spruce);}
+  .tierband .tname{font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:.06em;}
+  .tierband .tdesc{color:var(--ink-soft); font-size:13px;}
+  .qcard{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin-bottom:12px; display:grid; grid-template-columns:56px 1fr; gap:14px; transition:box-shadow .15s;}
+  .qcard:hover{box-shadow:0 3px 14px rgba(38,49,43,.10);}
+  .score{display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .score .big{font-family:'Fraunces',serif; font-weight:900; font-size:26px; line-height:1; color:var(--spruce);}
+  .score .lbl{font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft);}
+  .stickerrow{display:flex; gap:3px; flex-wrap:wrap; justify-content:center; max-width:52px;}
+  .stk{width:11px; height:11px; border-radius:50%;}
+  .stk.p{background:var(--p-red);} .stk.s{background:var(--s-green);} .stk.o{background:var(--line);}
+  .qtitle{font-weight:700; font-size:15px; margin-bottom:2px;}
+  .qtitle button.open-q{appearance:none; border:none; background:none; font:inherit; color:var(--ink); cursor:pointer; text-align:left; padding:0; text-decoration:underline; text-decoration-color:var(--tape); text-underline-offset:3px;}
+  .qtitle button.open-q:hover{color:var(--spruce); text-decoration-color:var(--spruce);}
+  .qwhy{font-size:13.5px; color:var(--ink-soft); margin:4px 0 8px;}
+  .tags{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .tag{font-size:11px; font-weight:600; padding:2px 9px; border-radius:99px; border:1px solid var(--line); color:var(--ink-soft); background:var(--paper);}
+  .tag.hit{background:var(--spruce); border-color:var(--spruce); color:#fff;}
+  .quote-pull{border-left:3px solid var(--kraft); background:var(--paper2); font-style:italic; font-size:13px; padding:7px 12px; margin-top:9px; border-radius:0 6px 6px 0; color:#4A5049;}
+  .cmt-count{font-size:11px; color:var(--spruce); font-weight:700; margin-left:8px;}
+  .filterbar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:6px;}
+  .filterbar button{appearance:none; border:1px solid var(--line); background:#fff; border-radius:99px; padding:5px 14px; font-size:12.5px; font-weight:600; color:var(--ink-soft); cursor:pointer;}
+  .filterbar button[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .filterbar button:focus-visible{outline:2px solid var(--kraft);}
+
+  /* practice code chips (clickable everywhere) */
+  .pc{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--spruce); background:var(--paper2); padding:1px 7px; border-radius:4px; margin:0 2px; white-space:nowrap; cursor:pointer; border:1px solid transparent;}
+  .pc:hover{border-color:var(--spruce);}
+
+  /* ── modal ─────────────────────────────── */
+  .modal-veil{position:fixed; inset:0; background:rgba(31,40,35,.55); display:none; z-index:50; padding:24px 14px; overflow-y:auto;}
+  .modal-veil.open{display:flex; align-items:flex-start; justify-content:center;}
+  .modal{background:var(--paper); border-radius:14px; max-width:760px; width:100%; padding:0; box-shadow:0 20px 60px rgba(0,0,0,.35); margin:auto 0;}
+  .modal-head{background:var(--spruce-deep); color:#F4F1E4; border-radius:14px 14px 0 0; padding:18px 22px; display:flex; align-items:flex-start; gap:14px;}
+  .modal-head h3{font-family:'Fraunces',serif; font-size:19px; font-weight:600; flex:1; line-height:1.25;}
+  .modal-head .close{appearance:none; border:none; background:rgba(255,255,255,.12); color:#fff; width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer; flex-shrink:0;}
+  .modal-head .close:hover{background:rgba(255,255,255,.25);}
+  .modal-body{padding:20px 22px 24px;}
+  .mb-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--spruce); margin:18px 0 6px;}
+  .mb-label:first-child{margin-top:0;}
+  .official{background:#fff; border:1px solid var(--line); border-left:4px solid var(--kraft); border-radius:0 8px 8px 0; padding:12px 15px; font-size:14px;}
+  .official .src{display:block; font-size:11px; color:var(--ink-soft); margin-top:6px; font-family:'IBM Plex Mono',monospace;}
+  ol.ansladder{margin:0 0 0 20px; font-size:13.5px;}
+  ol.ansladder li{margin-bottom:6px; padding-left:4px;}
+  ol.ansladder li .plain{display:block; font-size:12.5px; color:var(--ink-soft); font-style:italic;}
+  .gloss-list{display:flex; flex-direction:column; gap:8px;}
+  .gloss{background:#fff; border:1px solid var(--line); border-radius:8px; padding:9px 12px; font-size:13px;}
+  .gloss b{font-family:'IBM Plex Mono',monospace; color:var(--spruce); font-size:12.5px; margin-right:6px;}
+  .gloss span{color:var(--ink-soft);}
+  /* comments */
+  .cmt{background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px 13px; margin-bottom:8px; font-size:13.5px;}
+  .cmt .meta{font-size:11.5px; color:var(--ink-soft); margin-bottom:3px;}
+  .cmt .meta b{color:var(--ink);}
+  .cmt .ptag{font-size:10.5px; background:var(--paper2); border-radius:99px; padding:1px 8px; margin-left:6px; color:var(--spruce); font-weight:600;}
+  .interview{background:var(--paper2); border-radius:10px; padding:14px 16px; margin-top:6px;}
+  .interview .ihead{font-size:12px; font-weight:700; margin-bottom:8px;}
+  .prompt-pills{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .prompt-pills button{appearance:none; border:1px solid var(--line); background:#fff; border-radius:99px; padding:5px 12px; font-size:12px; font-weight:600; color:var(--ink-soft); cursor:pointer; text-align:left;}
+  .prompt-pills button[aria-pressed="true"]{background:var(--spruce); color:#fff; border-color:var(--spruce);}
+  .interview textarea{width:100%; min-height:74px; border:1px solid var(--line); border-radius:8px; padding:9px 11px; font:inherit; font-size:13.5px; background:#fff; resize:vertical;}
+  .interview .row{display:flex; gap:10px; align-items:center; margin-top:9px; flex-wrap:wrap;}
+  .interview label.consent{font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:6px;}
+  .btn{appearance:none; border:none; background:var(--spruce); color:#fff; border-radius:7px; padding:8px 18px; font-weight:700; font-size:13px; cursor:pointer;}
+  .btn:hover{background:var(--spruce-deep);}
+  .btn.ghost{background:transparent; color:var(--spruce); border:1px solid var(--spruce);}
+  .btn:disabled{opacity:.5; cursor:default;}
+  .btn:focus-visible{outline:2px solid var(--kraft); outline-offset:2px;}
+
+  /* crosswalk */
+  .xwalk{display:grid; grid-template-columns:1fr 1.05fr 1fr; gap:14px;}
+  .col h3{font-family:'Fraunces',serif; font-size:16px; font-weight:600; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid var(--ink);}
+  .chip{background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:8px; font-size:13px; cursor:pointer; transition:all .15s;}
+  .chip:hover{border-color:var(--spruce);}
+  .chip.on{border-color:var(--spruce); background:#EAF3EC; box-shadow:0 0 0 2px var(--spruce);}
+  .chip.dim{opacity:.28;}
+  .chip .who{font-size:11px; color:var(--ink-soft); font-style:normal; display:block; margin-top:4px;}
+  .chip.voice{font-style:italic;}
+  .chip.concern{font-weight:700; display:flex; align-items:center; gap:8px;}
+  .chip.concern .cdot{width:14px; height:14px; border-radius:50%; flex-shrink:0;}
+  .chip.q .code2{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--spruce);}
+  .xhint{font-size:12.5px; color:var(--ink-soft); background:var(--paper2); border-radius:8px; padding:8px 14px; margin-bottom:16px; display:inline-block;}
+
+  /* heatmap */
+  .hm-wrap{overflow-x:auto; background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px;}
+  table.hm{border-collapse:collapse; width:100%; min-width:760px; font-size:12.5px;}
+  table.hm th{font-size:11px; text-transform:uppercase; letter-spacing:.04em; padding:8px 6px; text-align:center; color:var(--ink-soft); border-bottom:2px solid var(--ink); font-weight:700;}
+  table.hm th.rowh{text-align:left;}
+  table.hm td{padding:7px 6px; text-align:center; border-bottom:1px solid var(--paper2);}
+  table.hm td.rowh{text-align:left; font-weight:600;}
+  table.hm td.cat{font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; text-align:left; padding-top:14px; border-bottom:1px solid var(--line); font-weight:700;}
+  .pri{display:inline-block; width:18px; height:18px; border-radius:50%; background:var(--p-red); color:#fff; font-size:10px; font-weight:700; line-height:18px;}
+  th.you, td.you{background:#EAF3EC;}
+  .hm-note{font-size:12.5px; color:var(--ink-soft); margin-top:12px;}
+
+  /* gaps */
+  .gapcard{background:#fff; border:1px solid var(--line); border-left:5px solid var(--p-red); border-radius:8px; padding:16px 18px; margin-bottom:14px;}
+  .gapcard h3{font-size:15px; font-weight:700; margin-bottom:4px;}
+  .gapcard p{font-size:13.5px; color:var(--ink-soft); margin-bottom:8px;}
+  .gapcard .fb{background:var(--paper2); border-radius:6px; padding:10px 12px; font-size:12.5px; font-family:'IBM Plex Mono',monospace; color:#3D463F;}
+  .gapcard .fb b{display:block; font-family:'Public Sans'; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--spruce); margin-bottom:4px;}
+
+  /* vote */
+  .idbar{display:flex; gap:10px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin-bottom:14px; flex-wrap:wrap;}
+  .idbar input{border:1px solid var(--line); border-radius:7px; padding:8px 12px; font:inherit; font-size:13.5px; min-width:200px;}
+  .idbar .status{font-size:12px; color:var(--ink-soft); margin-left:auto;}
+  .idbar .status.ok{color:var(--s-green); font-weight:700;}
+  .shared-note{font-size:12px; color:var(--ink-soft); background:#FFF6DE; border:1px solid #EAD9A0; border-radius:8px; padding:8px 13px; margin-bottom:14px;}
+  .roundtabs{display:flex; gap:8px; margin-bottom:14px;}
+  .roundtabs button{appearance:none; border:1px solid var(--line); background:#fff; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:700; cursor:pointer; color:var(--ink-soft);}
+  .roundtabs button[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .votebar{display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin-bottom:14px; flex-wrap:wrap;}
+  .votebar .bank{display:flex; gap:5px; flex-wrap:wrap; max-width:280px;}
+  .bstk{width:22px; height:22px; border-radius:50%; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center;}
+  .bstk.p{background:var(--p-red);} .bstk.s{background:var(--s-green);} .bstk.g{background:var(--dot-gold);} .bstk.spent{background:var(--line); color:var(--ink-soft);}
+  .vlbl{font-size:12.5px; font-weight:600;}
+  .vrow{display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin-bottom:8px; flex-wrap:wrap;}
+  .vrow .vname{flex:1; min-width:220px; font-size:13.5px; font-weight:600;}
+  .vrow .vname button{appearance:none; background:none; border:none; font:inherit; font-weight:600; cursor:pointer; text-decoration:underline; text-decoration-color:var(--tape); text-underline-offset:3px; color:var(--ink); text-align:left; padding:0;}
+  .vrow .vname button:hover{color:var(--spruce);}
+  .vrow .vcat{font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; width:96px;}
+  .vrow .vbtns{display:flex; gap:6px; align-items:center;}
+  .vrow .stkbtn{appearance:none; width:30px; height:30px; border-radius:50%; border:2px dashed var(--line); background:transparent; font-weight:700; font-size:12px; cursor:pointer; color:var(--ink-soft);}
+  .vrow .stkbtn.pon{background:var(--p-red); border-style:solid; border-color:var(--p-red); color:#fff;}
+  .vrow .stkbtn.son{background:var(--s-green); border-style:solid; border-color:var(--s-green); color:#fff;}
+  .vrow .dotctl{display:flex; align-items:center; gap:6px;}
+  .vrow .dotctl button{appearance:none; width:26px; height:26px; border-radius:50%; border:1px solid var(--line); background:#fff; font-weight:700; cursor:pointer;}
+  .vrow .dotctl .dots{display:flex; gap:3px; min-width:48px; justify-content:center;}
+  .vrow .dotctl .d{width:13px; height:13px; border-radius:50%; background:var(--dot-gold);}
+  .vrow button:focus-visible{outline:2px solid var(--kraft);}
+  .tally{background:var(--spruce-deep); color:#EAF3EC; border-radius:10px; padding:16px 20px; margin-top:20px;}
+  .tally h3{font-family:'Fraunces',serif; font-size:17px; margin-bottom:4px;}
+  .tally .tsub{font-size:12px; color:#9FD3AE; margin-bottom:12px;}
+  .tally .trow{display:flex; align-items:center; gap:10px; font-size:12.5px; margin-bottom:6px; flex-wrap:wrap;}
+  .tally .tname{width:280px;}
+  .tally .bars{display:flex; gap:2px; align-items:center; flex:1; min-width:160px;}
+  .tally .b{height:12px; border-radius:3px;}
+  .tally .bp{background:var(--p-red);} .tally .bs{background:var(--s-green);} .tally .bg2{background:var(--dot-gold);}
+  .tally .tn{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CDDCCB; width:110px;}
+  .tally .refresh{margin-top:10px;}
+
+  .idea{background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin-bottom:14px; display:grid; grid-template-columns:44px 1fr; gap:14px;}
+  .idea .inum{font-family:'Fraunces',serif; font-weight:900; font-size:26px; color:var(--kraft); line-height:1;}
+  .idea h3{font-size:15px; font-weight:700; margin-bottom:4px;}
+  .idea p{font-size:13.5px; color:var(--ink-soft);}
+  .idea .now{display:inline-block; margin-top:8px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--spruce); background:#EAF3EC; padding:2px 10px; border-radius:99px;}
+
+  footer{max-width:1100px; margin:0 auto; padding:0 20px 40px; font-size:12px; color:var(--ink-soft);}
+  @media (max-width:800px){
+    .xwalk{grid-template-columns:1fr;}
+    .qcard{grid-template-columns:1fr;}
+    .score{flex-direction:row; justify-content:flex-start;}
+    .stickerrow{max-width:none;}
+    .tally .tname{width:100%;}
+  }
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="mast">
+    <div class="eyebrow">Strafford County Conservation District · Epping Work Unit · FY 2027 Ranking Input · v2</div>
+    <h1>From flip-chart stickers to <em>ranking questions</em> — and back</h1>
+    <p class="lede">Now with the full official question text and a plain-language practice glossary behind every card, a two-round sticker board (meeting round + post-workgroup round) that saves and aggregates across participants, and a "Talk to the Question" comment layer built on the interview-guide method: one prompt at a time, invite the story, capture the headline, respect consent.</p>
+    <div class="legend">
+      <span><span class="dot p">P</span>Primary sticker · Round 1</span>
+      <span><span class="dot s">S</span>Secondary sticker · Round 1</span>
+      <span><span class="dot g">•</span>Post-WG dot · Round 2</span>
+      <span>Any <span class="pc">code</span> is tappable → plain language</span>
+    </div>
+    <nav role="tablist" aria-label="Sections">
+      <button role="tab" aria-selected="true" data-tab="rank">Question Rankings</button>
+      <button role="tab" aria-selected="false" data-tab="xwalk">Crosswalk</button>
+      <button role="tab" aria-selected="false" data-tab="hm">Statewide Heatmap</button>
+      <button role="tab" aria-selected="false" data-tab="gaps">Gaps &amp; Feedback</button>
+      <button role="tab" aria-selected="false" data-tab="vote">Sticker Board</button>
+      <button role="tab" aria-selected="false" data-tab="process">Process &amp; Guide</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section id="rank" role="tabpanel">
+  <h2>The 19 resource questions, ranked by local relevance</h2>
+  <p class="sub">Scored against the Epping work-unit primaries (pest pressure · runoff to water · loss of working lands), the March sticker votes, and direct transcript testimony. <strong>Click any question title</strong> to read the official NRCS wording, the answer ladder in plain language, the practices it references, and the community comments behind it.</p>
+  <div class="filterbar" id="filters"></div>
+  <div id="qlist"></div>
+</section>
+
+<section id="xwalk" role="tabpanel" hidden>
+  <h2>Trace a farmer's words to a ranking question</h2>
+  <p class="sub">Click any item in any column to light up its full chain. Question chips open the full question card.</p>
+  <span class="xhint">Tap a <b>concern</b> (middle) to see both directions · tap a <b>question</b> twice to open its card</span>
+  <div class="xwalk">
+    <div class="col"><h3>What participants said</h3><div id="voices"></div></div>
+    <div class="col"><h3>Resource concern</h3><div id="concerns"></div></div>
+    <div class="col"><h3>FY27 ranking questions</h3><div id="xqs"></div></div>
+  </div>
+</section>
+
+<section id="hm" role="tabpanel" hidden>
+  <h2>Where Strafford sits in the statewide picture</h2>
+  <p class="sub">Primary concerns by work unit, from the 2026 results presented to the State Technical Committee. Runoff to water and loss of working lands went primary nearly everywhere; pest pressure is what makes the Epping unit distinct.</p>
+  <div class="hm-wrap"><table class="hm" id="hmtable"></table></div>
+  <p class="hm-note">Each district's report becomes a negotiation position: Strafford can see which priorities have a statewide coalition behind them and which need a locally argued case.</p>
+</section>
+
+<section id="gaps" role="tabpanel" hidden>
+  <h2>What the questions don't ask</h2>
+  <p class="sub">Four priorities with stickers or sustained discussion behind them and <strong>no corresponding question</strong>. Draft language is ready for the survey's "Additional Feedback" field, due with selections by August 14.</p>
+  <div id="gaplist"></div>
+</section>
+
+<section id="vote" role="tabpanel" hidden>
+  <h2>Two-round sticker board</h2>
+  <p class="sub"><strong>Round 1</strong> mirrors the meeting: 3 red P and 3 green S stickers, one per question. <strong>Round 2</strong> is the post-workgroup ranking: after reading the full questions and each other's comments, every participant gets 10 more dots to spend, up to 3 on any one question. Enter your name so your board saves and joins the group tally.</p>
+  <div class="shared-note">⚠ Votes and shared comments entered here are visible to everyone using this tool — that's the point of a group tally. Comments marked "facilitator only" are still stored in the shared space but flagged for facilitator review rather than public display.</div>
+  <div class="idbar">
+    <label class="vlbl" for="pname">Participant</label>
+    <input id="pname" placeholder="Your name (e.g., Dorn C.)" autocomplete="name">
+    <button class="btn" id="join">Join board</button>
+    <span class="status" id="savestat">not saving yet</span>
+  </div>
+  <div class="roundtabs">
+    <button aria-pressed="true" data-r="1">Round 1 · Meeting stickers</button>
+    <button aria-pressed="false" data-r="2">Round 2 · Post-WG dots</button>
+  </div>
+  <div class="votebar" id="bankbar"></div>
+  <div id="vrows"></div>
+  <div class="tally" id="tally"></div>
+</section>
+
+<section id="process" role="tabpanel" hidden>
+  <h2>From tool to question set &amp; visualization guide</h2>
+  <p class="sub">This page is converging with the "Talk to the…" method on purpose. Both are structured elicitation instruments: the interview guide structures a conversation with a person; the ranking survey structures a conversation with an application. The evolution path below turns this one-county tool into a maintained, versioned guide any district can fork.</p>
+
+  <div class="idea"><div class="inum">1</div><div>
+    <h3>Question cards as the unit of the guide</h3>
+    <p>Every card here already holds: official wording, plain-language translation, practice glossary, LWG evidence, and a comment thread. That's the complete anatomy of a question-set entry. The guide is the deck; the deck is data.</p>
+    <span class="now">Done in this file — one JSON object per question</span>
+  </div></div>
+
+  <div class="idea"><div class="inum">2</div><div>
+    <h3>"Talk to the Question" as the comment protocol</h3>
+    <p>The comment prompts follow the interviewer method: one prompt at a time, invite a story not an opinion, capture a headline, gate consent before sharing. A blank box collects complaints; a guided prompt collects evidence the district can actually cite in its Conservation Needs Assessment narrative.</p>
+    <span class="now">Done — prompts live in each question card</span>
+  </div></div>
+
+  <div class="idea"><div class="inum">3</div><div>
+    <h3>Two-round deliberation as the default</h3>
+    <p>Round 1 captures gut priorities in the room; Round 2 captures considered priorities after people have read the full questions and each other's stories. The gap between the two rounds is itself a finding — questions that gain dots after reading are under-explained at meetings; questions that lose dots were riding on their titles.</p>
+    <span class="now">Done — compare rounds in the tally</span>
+  </div></div>
+
+  <div class="idea"><div class="inum">4</div><div>
+    <h3>Version the question set like the interview guide</h3>
+    <p>Per the versioning plan for the interviewer application: each year's question set is a tagged release in a git repo (question JSON + glossary + crosswalk map), with district-proposed changes as pull requests and the STC as the merge authority. The "Additional Feedback" field becomes an issue tracker instead of a black box.</p>
+    <span class="now">Next — same repo pattern as talk-to-the-interviewer</span>
+  </div></div>
+
+  <div class="idea"><div class="inum">5</div><div>
+    <h3>Interview-to-registry pipeline for LWG</h3>
+    <p>The handbook's pipeline — Capture → Consent gates → Structure → Populate — maps exactly: meeting transcript captured, consent handled at sign-in, structured into the quote→concern→question crosswalk, populating both the district report and the statewide heatmap. The March transcript went through this pipeline by hand; the guide documents it so any district can repeat it.</p>
+    <span class="now">Next — Appendix A of the handbook grows a visualization chapter</span>
+  </div></div>
+
+  <div class="idea"><div class="inum">6</div><div>
+    <h3>The visualization guide itself</h3>
+    <p>Codify the four views as reusable patterns with when-to-use guidance: <b>ranked cards</b> (deciding among questions), <b>three-column crosswalk</b> (showing provenance), <b>unit × concern heatmap</b> (situating locally in statewide), <b>two-round tally</b> (deliberation). Each pattern ships with its data shape, so the guide is both a facilitation document and a rendering spec.</p>
+    <span class="now">Next — companion chapter to the Talk to the… Handbook</span>
+  </div></div>
+</section>
+
+</main>
+
+<!-- modal shell -->
+<div class="modal-veil" id="veil" role="dialog" aria-modal="true">
+  <div class="modal" id="modalbox"></div>
+</div>
+
+<footer>
+  Sources: Stafford County LWG transcript (Mar 2026) · NH NRCS July 2026 Monthly District Report &amp; FY26 LWG Results · NCPP LWG Guidebook · Talk to the… Handbook (interview method). Question selections due to the District Conservationist by <b>August 14, 2026</b>. Advisory analysis — final ranking authority rests with NRCS.
+</footer>
+
+<script>
+/* ═══════════ PRACTICE GLOSSARY (plain language) ═══════════ */
+const GLOSSARY = {
+ "223":["Forest Management Assessment","A forester walks your woodlot and writes or updates the plan that unlocks other forestry practices."],
+ "314":["Brush Management","Knocking back woody invasives and brush — mechanically, by grazing, or with targeted herbicide."],
+ "315":["Herbaceous Weed Control","Treating non-woody invasive plants (knotweed, garlic mustard) in fields, pasture, or banks."],
+ "325":["High Tunnel System","An unheated hoophouse over in-ground soil to extend the season and protect crops."],
+ "327":["Conservation Cover","Permanent grass or wildflower cover on ground you're taking out of production."],
+ "328":["Crop Rotation","A planned sequence of different crops on the same field to break pest cycles and feed the soil."],
+ "336":["Soil Carbon Amendment","Applying compost or biochar to raise organic matter on depleted soils."],
+ "340":["Cover Crop","A crop grown to protect and feed the soil between cash crops — winter rye, clover, oats."],
+ "342":["Critical Area Planting","Getting tough vegetation established on badly eroding spots that won't heal on their own."],
+ "372":["Energy Efficient Ag Operation","Equipment swaps that cut fuel/electric use — in NH's question, sap pre-heaters and reverse osmosis for sugaring."],
+ "382":["Fence","Fencing — in these questions, fencing livestock OUT of streams, wetlands, and sensitive areas."],
+ "384":["Woody Residue Treatment","Arranging logging slash into walls or blankets — slash walls double as deer exclusion for regeneration."],
+ "390":["Riparian Herbaceous Cover","A grassy (not treed) buffer strip along a stream or pond."],
+ "391":["Riparian Forest Buffer","A strip of trees and shrubs, usually 35 ft or wider, between land and water — the workhorse water-quality practice."],
+ "393":["Filter Strip","A band of dense grass at the field edge that catches sediment and nutrients before they reach water."],
+ "395":["Stream Habitat Improvement","In-stream work — wood placement, bank shaping — to restore habitat and stabilize channels."],
+ "420":["Wildlife Habitat Planting","Planting herbaceous cover specifically for wildlife food and shelter."],
+ "422":["Hedgerow Planting","A planted row of shrubs/trees along a field edge — pollinators, birds, windbreak."],
+ "441":["Microirrigation","Drip or micro-spray irrigation replacing overhead guns — less water, less disease pressure."],
+ "490":["Tree/Shrub Site Preparation","Scarifying or prepping ground so desirable tree seed can catch naturally."],
+ "512":["Pasture & Hay Planting","Seeding or reseeding pasture and hayland — improved forage mixes, converting cropland to sod."],
+ "528":["Prescribed Grazing","A written rotational grazing plan: paddocks, rest periods, stocking — managed, not continuous, grazing."],
+ "560":["Access Road","Building or fixing a farm/forest access road to standard so it doesn't erode."],
+ "590":["Nutrient Management","Matching manure and fertilizer to what the crop actually needs, from a written plan (NMP/CNMP)."],
+ "595":["Pest Management (IPM)","An integrated pest management system: scouting, thresholds, targeted treatment — less blanket spraying."],
+ "606":["Subsurface Drain","Buried tile or pipe that lowers a seasonally high water table in wet fields."],
+ "612":["Tree/Shrub Establishment","Planting trees and shrubs — buffers, habitat, windbreaks."],
+ "643":["Restoration of Rare & Declining Natural Communities","Restoring an uncommon habitat type — in NH's question, aimed at estuary and coastal settings like Great Bay."],
+ "644":["Wetland Wildlife Habitat Mgmt","Managing wetlands for the wildlife that depend on them."],
+ "645":["Upland Wildlife Habitat Mgmt","Managing fields and uplands for wildlife — structure, food, cover."],
+ "647":["Early Successional Habitat","Creating young forest / shrubland — the thick regrowth cottontails, woodcock, and turtles use."],
+ "654":["Trail/Landing Closure","Permanently closing and stabilizing an old woods road, trail, or log landing."],
+ "655":["Forest Trails & Landings","Building or fixing woods trails and landings to a non-eroding standard."],
+ "666":["Forest Stand Improvement","Selective thinning to favor the trees (or wildlife structure) you want."],
+ "805":["Amending Soil with Lime","Lime application to correct pasture/field pH — paired with soil tests."],
+ "821":["Low Tunnel System","Low hoops and row cover over beds — a smaller, cheaper season extender than a high tunnel."],
+ "CEMA 216":["Soil Health Testing","A funded soil health test package — the RPP pilot requires it in year one and the final year."],
+ "CEMA 217":["Soil Testing","Funded standard soil testing — the on-ramp when you don't have current tests for 512/805."],
+ "CEMA 219":["Grazing Monitoring","Funded monitoring that pairs with a grazing plan to document what the rotation is doing."],
+ "CPA":["Conservation Plan Activity","Paying a planner (increasingly a TSP) to write your whole-farm or forest conservation plan."],
+ "DIA":["Design & Implementation Activity","Funded design work that turns a plan into build-ready practice designs."],
+ "CEMA":["Conservation Evaluation & Monitoring","The family of funded assessment/monitoring activities (soil tests, grazing monitoring, energy audits)."],
+ "NMP":["Nutrient Management Plan","The written plan behind practice 590; CNMP is the comprehensive version for livestock operations."],
+ "RPP":["Regenerative Pilot Program","FY27 national pilot: 5-yr contracts, soil health testing bookends, soil & water concerns to threshold, regenerative practices."],
+ "GMP":["Grazing Management Plan","An NRCS-standard grazing plan — one of the plan types the growing TSP network writes."],
+ "ALE":["Agricultural Land Easement","The ACEP easement that permanently protects farmland from development."],
+};
+
+/* ═══════════ QUESTIONS ═══════════ */
+const THEMES = ["Water quality","Soil health","Pest & invasives","Working lands","Livestock","Flooding & drainage","Forestry","Energy","Habitat"];
+
+const QUESTIONS = [
+ {id:"buffer", t:"Establish new buffers on waterbodies", codes:["391","395","393","327","342","512","390"], score:10, tier:1, themes:["Water quality","Habitat","Working lands"], wu:["Runoff to water"],
+  official:"Does the application include practices to establish a new buffer on waterbodies to prevent nutrient runoff and sedimentation resource concerns? (Select all that apply)",
+  choices:[["Riparian Forest Buffer (391) with Stream Habitat Improvement and Management (395) to stabilize the streambank","Top rung: trees on the bank plus in-stream stabilization — the paired answer erosion comments point at."],
+           ["Riparian Forest Buffer (391) only, minimum 35 ft. width","A treed buffer alone."],
+           ["Filter Strip (393)","A grass filter band at the field edge."],
+           ["Other permanent herbaceous cover — Conservation Cover (327), Critical Area Planting (342), Pasture and Hay Planting (512), or Riparian Herbaceous Cover (390)","Any other permanent vegetated cover doing buffer work."],
+           ["No","No new buffer planned."]],
+  why:"Runoff to water went primary in all eight work units AND drew multiple primary stickers in this room. Buffers are the most direct EQIP answer.",
+  quote:"Anywhere that it runs off — be great if it was paid more attention to."},
+ {id:"pest595", t:"Pest Management (595) for plant pest pressure", codes:["595"], score:9, tier:1, themes:["Pest & invasives","Water quality"], wu:["Pest pressure"],
+  official:"Is Pest Management (595) being implemented to treat plant pest pressure, transportation of pesticides to surface/groundwater, or emissions of particulate matter/ozone precursors resource concerns?",
+  choices:[["Yes, on a Certified, Certification Exempt, or Transitioning to Organic Farm","Extra credit for organic operations — several were in the room."],
+           ["Yes","IPM on any operation."],["No","Not planned."]],
+  why:"Pest pressure is one of only two work-unit primaries unique to Epping statewide; the question also credits reduced pesticide transport to surface water.",
+  quote:"The insect pressure has changed because the climate has changed… and if you do use chemicals, they're becoming resistant."},
+ {id:"nm590", t:"Nutrient Management (590) from a current plan", codes:["590","NMP"], score:9, tier:1, themes:["Soil health","Water quality"], wu:["Runoff to water"],
+  official:"Will Nutrient Management (590) be implemented in the application based on a current NMP/CNMP?",
+  choices:[["Advanced — improves nutrient use efficiency through manure injection, in-season nitrogen testing, and/or slow-release fertilizers (coated/urease inhibitors)","The high rung rewards exactly the manure-handling issues producers described."],
+           ["Basic — includes only required NMP elements, such as prescribed application rates and setbacks from sensitive areas (surface water, wells, and wetlands) when present","Plan-following without the advanced techniques."],
+           ["Nutrient Management (590) is not planned or there isn't a current NMP/CNMP","No plan, no credit."]],
+  why:"Carries the soil-nutrient-loss primary stickers and the runoff primary at once.",
+  quote:"We're dealing with a lot of nutrient loss."},
+ {id:"cc340", t:"Cover Crops (340) implementation level", codes:["340"], score:9, tier:1, themes:["Soil health","Water quality","Pest & invasives"], wu:["Runoff to water"],
+  official:"Cover Crops (340) planned in the application will be implemented following way:",
+  choices:[["Advanced — planted to supply nitrogen (legume) to the following crop, reduce soil compaction (deep rooted), provide beneficial insect habitat, interseeded, or grazed as forage directly by livestock (must follow NH Cover Crop Planting Specifications)","Legumes, compaction relief, grazing the cover — three separate meeting threads in one rung."],
+           ["Basic — planted behind a cash crop, typically cereal grains, for soil erosion, nutrient scavenging, and organic matter resource concerns; all residue remains in the field after termination","The winter-rye pattern a participant described."],
+           ["Harvested — cover crop residue is removed from the field as forage or clean straw (not grain)","Lower credit when the biomass leaves."],
+           ["Cover Crop (340) is not planned","No cover crop."]],
+  why:"Voiced unprompted, a named FY26 high-priority practice, and the Advanced rung matches the livestock-integration thread.",
+  quote:"We plant a cover crop like winter rye in the fall… encouraging the use of legumes for the nitrogen."},
+ {id:"inv", t:"Invasive control on pasture (314/315)", codes:["314","315"], score:8, tier:1, themes:["Pest & invasives","Livestock"], wu:["Pest pressure"],
+  official:"Is Brush Management (314) or Herbaceous Weed Control (315) planned in the application to address invasive plants on pasture?",
+  choices:[["YES","Invasive treatment planned."],["NO","Not planned."]],
+  why:"Invasive upland plants went primary in three work units and drew stickers here; bittersweet, knotweed, and climbing rose were named on riverbanks.",
+  quote:"That climbing rose has just taken over our riverbanks. Japanese knotweed all over."},
+ {id:"rot328", t:"Crop Rotation (328) implementation", codes:["328","512","340"], score:8, tier:1, themes:["Soil health","Livestock","Working lands"], wu:[],
+  official:"Crop Rotation (328) planned in the application will be implemented in the following way:",
+  choices:[["Annual crops are planned in rotation with perennial crops, such as Pasture and Hay Planting (512)","The top rung IS the livestock-into-vegetable-ground integration a participant proposed."],
+           ["Multiple annual cash crops in rotation; Cover Crops (340) are planned between cash crops as needed","Diverse annual rotation with covers."],
+           ["A single annual crop and Cover Crop (340) in rotation","Minimal rotation."],
+           ["Crop Rotation (328) is not planned","No rotation."]],
+  why:"The most quotable soil complaint in the transcript is a rotation constraint.",
+  quote:"With the way our land is, it's really hard to rotate properly, so we're dealing with a lot of nutrient loss."},
+ {id:"drain606", t:"Subsurface Drainage (606) for wet fields", codes:["606"], score:7, tier:2, themes:["Flooding & drainage","Soil health"], wu:[],
+  official:"Will a seasonally high water table in field crops be lowered through the installation of Subsurface Drainage (606) that will not impact wetlands (wetlands located by Soil Scientists)?",
+  choices:[["Yes — field drainage in orchards, vineyards, and berry crops where there is evidence of rutting, root disease, and/or plant mortality","Highest rung for perennial crops with documented damage."],
+           ["Yes — field drainage on other cropland types","Other cropland drainage."],
+           ["No, or associated only with other structural practices","Not planned as primary drainage."]],
+  why:"Ponding, blue-clay soils, and half-the-farm spring access were described in detail; the wetland screen is the right guardrail here.",
+  quote:"In the spring I can only get on half the land… the blue clay dries out during the drought."},
+ {id:"est643", t:"Estuary/coastal restoration (643)", codes:["643"], score:7, tier:2, themes:["Water quality","Habitat"], wu:["Runoff to water"],
+  official:"Is the Restoration of Rare and Declining Natural Communities (643) planned in an estuary or coastal environment to address an aquatic habitat or water quality resource concern?",
+  choices:[["YES","Estuary/coastal restoration planned."],["NO","Not planned."]],
+  why:"The most Strafford-specific question on the list — the one that lets a Great Bay/oyster project score.",
+  quote:"The silts are going to pollute those oyster farms, and the contaminants are probably going to destroy them."},
+ {id:"aop", t:"Aquatic habitat connectivity on streams", codes:["395","391"], score:7, tier:2, themes:["Habitat","Water quality"], wu:[],
+  official:"Select all practices included in the application that address an Aquatic Habitat Resource Concern to improve connectivity or habitat on perennial streams:",
+  choices:[["Dam Removal","Yes — dam removal is a scoreable answer. The on-ramp for the private-lands side of the Durham Dam conversation."],
+           ["Full removal of culvert, no replacement","Opening the channel entirely."],
+           ["Culvert removal replaced with bridge or arch culvert (natural bottom)","The wider natural-bottom crossing that turtles and fish can pass — what the room asked about."],
+           ["Stream Habitat and Management (395)","In-stream habitat work."],
+           ["Riparian Buffer (391)","Buffer planting counts here too."],
+           ["None of the above practices are planned","No connectivity work."]],
+  why:"A participant asked what aquatic organism passage even was — then the room connected culverts, turtles, and the dam.",
+  quote:"Explain to me the aquatic organism passage?"},
+ {id:"soiltest", t:"Current soil tests on pastures (512/805)", codes:["512","805","CEMA 217"], score:6, tier:2, themes:["Soil health","Livestock"], wu:[],
+  official:"Are there current soil tests (3 years or newer) on all pastures where Pasture and Hay Planting (512) and/or Amending Soil Properties with Lime (805) are planned?",
+  choices:[["Yes","Current tests everywhere the practices land."],
+           ["No, but CEMA 217 is planned in the application (for 512 only)","The on-ramp: fund the testing itself."],
+           ["No, or 512 and 805 are not planned","No tests, no credit."]],
+  why:"The room spent real time on where soil testing even happens now — this question converts that access complaint into funded testing.",
+  quote:"They will send out soil samples, but they don't do plant diagnostics anymore."},
+ {id:"gmpprac", t:"Practices from an existing Grazing Management Plan", codes:["GMP","528"], score:6, tier:2, themes:["Livestock","Soil health"], wu:["Loss of working lands"],
+  official:"The application includes practices recommended in an existing Grazing Management Plan that meets NRCS requirements.",
+  choices:[["YES","Plan-based grazing application."],["NO","No qualifying plan."]],
+  why:"Grazing plans were named as a growth area for the TSP network at this very meeting.",
+  quote:"More TSPs… in the realm of developing grazing management plans, nutrient management plans."},
+ {id:"gm528", t:"Years of Grazing Management (528)", codes:["528","CEMA 219"], score:6, tier:2, themes:["Livestock","Soil health"], wu:[],
+  official:"How many years of Grazing Management (528) are in the application?",
+  choices:[["4–5 years AND is paired with CEMA 219","Long rotation plus funded monitoring — top rung."],
+           ["4–5 years","Long rotation."],["2–3 years AND is paired with CEMA 219","Shorter, monitored."],
+           ["2–3 years","Shorter rotation."],["1 year or not planned","Minimal."]],
+  why:"Multi-year managed grazing is the practice expression of the livestock–crops–soil integration thread.",
+  quote:"Getting livestock in rotation with your vegetable crops… the traditional way of maintaining soil nutrients."},
+ {id:"fence382", t:"Fence (382) keeping livestock out of water", codes:["382"], score:6, tier:2, themes:["Livestock","Water quality"], wu:["Runoff to water"],
+  official:"Is Fence (382) planned in the application to remove or restrict animal access to surface water, wetlands, or sensitive areas?",
+  choices:[["Permanent fence + planted buffer","Fence plus vegetation — top rung."],["Temporary fence + planted buffer","Temporary exclusion with planting."],
+           ["Permanent fence + setback only (natural regeneration)","Fence with the bank left to regrow."],["Temporary fence + setback only (natural regeneration)","Lightest touch."],["No","Not planned."]],
+  why:"Bridges the livestock checkbox and the runoff primary. Note: this is exclusion OF livestock — the room's louder demand (exclusion of deer) has no question at all.",
+  quote:"Everyone really likes the 8-foot fences at NRCS. — But we don't fund them anymore."},
+ {id:"rpp", t:"Count of regenerative practices (RPP)", codes:["RPP","CEMA 216"], score:6, tier:2, themes:["Soil health","Water quality"], wu:[],
+  official:"How many primary regenerative primary practices are planned this application?",
+  choices:[["3 or more","Deep regenerative stack."],["1–2","Some new regenerative practices."],["0 (only existing primary regenerative practices are included in this application)","Maintaining, not adding."]],
+  why:"The regenerative pilot was pitched at the meeting as the program targeting soil and water health 'so farm succession can happen.'",
+  quote:"Making sure that farm succession can happen, that the farms aren't going to be completely depleted."},
+ {id:"sca336", t:"Soil Carbon Amendment (336) on poor soils", codes:["336"], score:5, tier:3, themes:["Soil health"], wu:[],
+  official:"Is Soil Carbon Amendment (336) planned on tilled soils with low organic matter, sandy soil textures, or negative SCI scores?",
+  choices:[["YES","Compost/biochar on qualifying soils."],["NO","Not planned."]],
+  why:"Organic matter as flood-and-drought buffer was an explicit argument in the room.",
+  quote:"Building up the soil health, the organic matter, so you have less problems with too much water and too little water."},
+ {id:"ht325", t:"High Tunnel (325) / Low Tunnel (821)", codes:["325","821"], score:5, tier:3, themes:["Soil health","Working lands"], wu:[],
+  official:"Is a High Tunnel System (325) or Low Tunnel System (821) planned to extend the growing season and/or improve plant productivity and health? (Select any that apply)",
+  choices:[["Yes, on a Certified, Certification Exempt, or Transitioning to Organic Farm","Organic operations first."],
+           ["Yes, on a farm that does not currently operate high tunnels","First tunnel."],
+           ["Yes, on a farm that already operates at least one high tunnel (does not have to be NRCS funded)","Additional tunnel — several in the room qualify."],
+           ["No","Not planned."]],
+  why:"Two growers in the room run high tunnels; one told the whole cost-share story. Demand exists even if tunnels weren't raised as a concern.",
+  quote:"I didn't get my dream one, but I got a whole high tunnel."},
+ {id:"graze-out", t:"Livestock out of confinement to pasture", codes:["528"], score:5, tier:3, themes:["Livestock","Soil health"], wu:[],
+  official:"Are livestock being brought out of a confinement system to be grazed on pasture during the growing season using Grazing Management (528)?",
+  choices:[["YES","Confinement-to-pasture transition."],["NO","Not applicable."]],
+  why:"Supports the pasture-integration and manure-distribution comments.",
+  quote:"On pasture, they're spreading the manure there rather than hauling it around."},
+ {id:"crop2past", t:"Cropland converted to pasture", codes:["512"], score:4, tier:3, themes:["Livestock","Working lands"], wu:[],
+  official:"Is cropland being converted to pasture with the practices in this application?",
+  choices:[["Yes, Pasture and Hay Planting (512) is planned to convert annually planted cropland to pasture","Cropland to sod."],
+           ["Yes, hayfield is being converted to a pasture","Hay to grazed pasture."],["No","No conversion."]],
+  why:"Pasture & hay planting was a named FY26 high-priority practice from last year's LWG.", quote:""},
+ {id:"farmstead", t:"Farmstead water-quality improvements", codes:["590"], score:4, tier:3, themes:["Water quality"], wu:["Runoff to water"],
+  official:"Are there practices in the application that result in improvements on farmstead to address a water quality resource concern?",
+  choices:[["Both structural and vegetative practices","Barnyard structure plus plantings."],["Yes, structural practices only","E.g., manure storage, heavy-use pads."],["Yes, vegetative practices only","Plantings only."],["No","Not planned."]],
+  why:"Manure storage cost-share came up concretely — the $20k concrete pad example.",
+  quote:"Building a new manure storage facility, concrete pad — it could cost you $20,000."},
+ {id:"poll", t:"Pollinator plantings near dependent crops", codes:["327","420","612","422"], score:4, tier:3, themes:["Habitat","Pest & invasives"], wu:[],
+  official:"Are perennial pollinator plantings, such as Conservation Cover (327), Wildlife Habitat Planting (420), Tree and Shrub Planting (612), or Hedgerow Planting (422), planned as part of this application on, or adjacent to crops that require pollination and there is a terrestrial habitat (invertebrate) resource concern?",
+  choices:[["YES","Pollinator habitat by pollination-dependent crops."],["NO","Not planned."]],
+  why:"Beekeeper concerns were mentioned; orchard and vegetable growers depend on pollinators — but it drew no stickers.",
+  quote:"Beekeepers have concerns about that."},
+ {id:"terrwild", t:"Terrestrial wildlife habitat practices", codes:["647","666"], score:4, tier:3, themes:["Habitat","Forestry"], wu:[],
+  official:"What practices in this application address a Terrestrial Wildlife resource concern? Select all that apply.",
+  choices:[["Cutting (for example, with excavator-mounted mower) young forest areas that have developed closed canopy, shading out dense understory vegetation","Resetting young forest."],
+           ["Wildlife-focused forest management (666) with the goal of providing missing vegetation layers","Thinning for structure."],
+           ["Delayed mowing of old fields to maintain late-season forbs and woody plants for wildlife","The rung most accessible to the hay operations present."],
+           ["None of the above practices are planned","None."]],
+  why:"Terrestrial habitat took one primary sticker here; it's Cheshire/Sullivan's work-unit primary, so coalition support exists.", quote:""},
+ {id:"fma223", t:"Forest Management Assessment (223)", codes:["223"], score:4, tier:3, themes:["Forestry","Working lands"], wu:["Loss of working lands"],
+  official:"Does the application include Forest Management Assessment (223)?",
+  choices:[["Yes, planned on land with an existing FMP to evaluate or re-evaluate a disturbance, timber harvest, or other management activity that occurred after the FMP was written","Post-disturbance re-check."],
+           ["Yes, planned to evaluate forestland where no forest management plan currently exists","First plan — the gateway for the woodlot owners in the room."],
+           ["Yes, planned to update an existing management plan where no management has occurred since the plan was written","Refreshing a stale plan."],["No","Not planned."]],
+  why:"The green-woodworking / local-forestry-markets thread needs management plans as its first step.",
+  quote:"Outside of getting a forester, how does an individual access markets?"},
+ {id:"fsi666", t:"Forest Stand Improvement (666)", codes:["666"], score:3, tier:4, themes:["Forestry"], wu:[],
+  official:"Does the application include Forest Stand Improvement (666) to address the Plant Productivity and Health or Plant Structure and Composition resource concerns?",
+  choices:[["Yes, and the Forest Stand Improvement planned is rehabilitation of degraded stands","Fixing high-graded woods."],
+           ["Yes, and the Forest Stand Improvement planned is poletimber chainsaw thinning","Mid-size thinning."],
+           ["Yes, planned but not rehabilitation or poletimber thinning","Other FSI."],["No","Not planned."]],
+  why:"Solid statewide; modest Strafford testimony beyond the deer-browse regeneration comment.",
+  quote:"With the deer pressure, you're not getting the regeneration."},
+ {id:"fsi-inv", t:"Invasive control paired with FSI", codes:["314","666"], score:3, tier:4, themes:["Forestry","Pest & invasives"], wu:[],
+  official:"Does the application control invasives (Brush Management (314) or another NRCS practice) to address Plant Pest Pressure or Plant Structure and Composition RCs on the same footprint or directly adjacent to an area where Forest Stand Improvement (666) is planned?",
+  choices:[["Yes","Treat invasives where you thin — so the opening doesn't fill with bittersweet."],["No","Not paired."]],
+  why:"Right pairing logic; relevance rides on the unit's forestry EQIP volume.", quote:""},
+ {id:"cpa", t:"Conservation planning (CPA/DIA/CEMA)", codes:["CPA","DIA","CEMA"], score:3, tier:4, themes:["Working lands","Soil health"], wu:["Loss of working lands"],
+  official:"Is a CPA/DIA/CEMA planned to update an existing plan, or for property with no existing plan? (companion question: Is this application only for a CPA/DIA/CEMA — no other practices?)",
+  choices:[["There is no existing plan(s)","First plan for the property."],
+           ["Multiple CPAs/DIAs/CEMAs are planned for multiple properties — some without existing plans, some updates","Mixed portfolio."],
+           ["This will update an existing plan(s) that is outdated (>10 years old for Forestry and >3 yrs old for Ag)","Refreshing stale plans."],["No","Neither."]],
+  why:"Plans are the quiet succession tool — an updated conservation plan travels with the land.", quote:""},
+ {id:"regen-trees", t:"Natural tree regeneration (slash walls, scarification)", codes:["384","490"], score:2, tier:4, themes:["Forestry"], wu:[],
+  official:"Does the application include practices that address Plant Productivity and Health or Plant Structure and Composition RCs by encouraging the natural regeneration of desirable tree species? (Select all that apply)",
+  choices:[["Woody Residue Treatment (384) is planned to create slash walls","Slash walls are deer exclusion by another name — a sleeper link to the room's #1 grievance."],
+           ["Tree/Shrub Site Preparation (490) is planned for scarification or similar technique","Prepping seedbed."],
+           ["Woody Residue Treatment (384) is planned to create slash blankets","Slash spread as ground protection."],["None of the above","None."]],
+  why:"Unfamiliar locally, but the slash-wall rung deserves a comment campaign given the deer discussion.", quote:""},
+ {id:"trails", t:"Forest roads, trails & landings for soil", codes:["655","654","560"], score:2, tier:4, themes:["Forestry","Flooding & drainage"], wu:[],
+  official:"Does the application include Forest Trails and Landings (655), Forest/Trail/Landing Closure and Treatment (654), or Access Road (560) to address Soil Resource Concerns? (Select one)",
+  choices:[["Yes, 654 is a Primary Practice for the permanent closure of a trail/road that goes through a wetland or hydric soils","Closing the worst crossings."],
+           ["Yes, 655/560 is a Primary Practice for stabilization or closeout of existing gully erosion on a forest road, trail, or landing","Gully repair."],
+           ["Yes, 655/560 is a Primary Practice for stabilization or closeout of existing sheet and rill erosion","Surface erosion repair."],
+           ["Yes, 655/560 is a Supporting Practice to create new forest/access roads, trails, landings, or temporary stream crossings","New infrastructure, lower credit."],
+           ["No — 655, 654, or 560 are not included","Not planned."]],
+  why:"No trail/landing erosion testimony this year.", quote:""},
+ {id:"cutmat", t:"All cut material left on site", codes:["384"], score:2, tier:4, themes:["Forestry","Soil health"], wu:[],
+  official:"Will all cut material be left on site?",
+  choices:[["Yes","Biomass stays — nutrients and structure retained."],["No","Material removed."]],
+  why:"Fine practice-hygiene question; no local signal either way.", quote:""},
+ {id:"energy", t:"Prescriptive energy-efficiency practice count", codes:["372"], score:2, tier:4, themes:["Energy"], wu:[],
+  official:"With regard to applications containing energy efficiency practices, how many NRCS NH prescriptive energy practices are included? (Select one)",
+  choices:[["2 or more","Multiple efficiency measures."],["1","One measure."],["None","None."]],
+  why:"The room's energy interest was solar, agrivoltaics, electrification — none of which any question reaches. See Gaps.",
+  quote:"It's going to be electric tractors and other stuff."},
+ {id:"sap372", t:"Sap pre-heater / reverse osmosis (372)", codes:["372"], score:1, tier:4, themes:["Energy","Forestry"], wu:[],
+  official:"Does the application include Energy Efficient Agricultural Operation (372) to install a sap pre-heater or reverse osmosis unit (where one does not currently exist) to address Inefficient Energy Use RCs?",
+  choices:[["YES","Sugaring efficiency upgrade."],["NO","Not applicable."]],
+  why:"Maple-specific; no sugaring testimony at this meeting.", quote:""},
+ {id:"micro441", t:"Transition to Microirrigation (441)", codes:["441"], score:1, tier:4, themes:["Water quality","Flooding & drainage"], wu:[],
+  official:"Will this application transition the land unit to Irrigation System, Microirrigation (441) from a less efficient form of irrigation, such as traveling gun or overhead, and result in reduced water use?",
+  choices:[["YES","Drip conversion."],["NO","Not planned."]],
+  why:"The room's water problem is too much water in spring, not inefficient irrigation. Lowest local fit.", quote:""},
+];
+
+const TIERS = {
+ 1:{name:"Select these", desc:"Direct carriers of Epping work-unit primaries with named testimony"},
+ 2:{name:"Strong supporting", desc:"Clear sticker or transcript evidence; include as space allows"},
+ 3:{name:"Situational", desc:"Coherent with discussion; weaker direct signal this cycle"},
+ 4:{name:"Low local fit", desc:"Legitimate statewide, little Strafford evidence in 2026"},
+};
+
+/* Talk to the Question — guided prompts (interviewer method: one at a time, invite stories) */
+const TPROMPTS = [
+ {id:"land", label:"On my land, this would look like…", hint:"Tell the story of where this practice would land on your operation — the field, the bank, the paddock."},
+ {id:"wording", label:"The wording misses…", hint:"What would a farmer misread here? What's the plain-language version?"},
+ {id:"missing", label:"What's missing from the answer choices…", hint:"Is there a rung that should exist? A practice that should count?"},
+ {id:"story", label:"A story that belongs behind this question…", hint:"Something said at the meeting — or that should have been."},
+];
+
+/* crosswalk */
+const XW = {
+ concerns:[
+  {id:"c-water", label:"Runoff to water / Great Bay", color:"#2E6E8E", voices:["v1","v2"], qs:["buffer","est643","aop","nm590","fence382","farmstead"]},
+  {id:"c-soil", label:"Soil nutrient loss & rotation", color:"#8A6A2F", voices:["v3","v4"], qs:["nm590","cc340","rot328","sca336","soiltest","rpp"]},
+  {id:"c-pest", label:"Pest pressure & invasives", color:"#A34328", voices:["v5","v6"], qs:["pest595","inv","fsi-inv","regen-trees"]},
+  {id:"c-flood", label:"Flooding, ponding & drainage", color:"#4A5FA5", voices:["v7","v8"], qs:["drain606","cc340","sca336"]},
+  {id:"c-lands", label:"Loss of working lands & succession", color:"#5B7B4C", voices:["v9","v10"], qs:["rpp","fma223","cpa","gmpprac"]},
+  {id:"c-live", label:"Livestock–crop integration", color:"#7A5AA0", voices:["v11"], qs:["gm528","gmpprac","graze-out","crop2past","rot328"]},
+ ],
+ voices:[
+  {id:"v1", q:"The silts are going to pollute those oyster farms…", who:"Oyster grower, on dam removal"},
+  {id:"v2", q:"It's too hard to nail it down to one source. It's all running off.", who:"On runoff sources"},
+  {id:"v3", q:"It's really hard to rotate properly, so we're dealing with a lot of nutrient loss.", who:"Vegetable grower"},
+  {id:"v4", q:"They don't do plant diagnostics anymore.", who:"On losing soil-test access"},
+  {id:"v5", q:"We are like a free-for-all buffet in Vegas.", who:"On deer pressure"},
+  {id:"v6", q:"That climbing rose has just taken over our riverbanks.", who:"On invasives"},
+  {id:"v7", q:"A 22-acre field underwater — the river took the fertility, the pH, everything.", who:"On the 2006 flood"},
+  {id:"v8", q:"In the spring I can only get on half the land.", who:"On blue clay drainage"},
+  {id:"v9", q:"Once farmland's gone, it's gone. It's not coming back.", who:"On development"},
+  {id:"v10", q:"I just can't afford to buy it.", who:"New farmer, on land access"},
+  {id:"v11", q:"Getting livestock in rotation with your vegetable crops… the traditional way of maintaining soil nutrients.", who:"On integration"},
+ ]
+};
+
+const HM = {
+ units:["Belknap","Hills./Mer.","Carroll","Coös","Che./Sull.","Grafton","Rockingham","Strafford"],
+ you:[6,7],
+ rows:[
+  {cat:"Wildlife & Fish"},
+  {c:"Terrestrial habitat conditions", pri:[4]},
+  {cat:"Plants & Forests"},
+  {c:"Pest pressure in agriculture", pri:[6,7]},
+  {c:"Invasive upland plants", pri:[0,1,5]},
+  {cat:"Soils"},
+  {c:"Soil erosion", pri:[5]},
+  {cat:"Water"},
+  {c:"Runoff to water", pri:[0,1,2,3,4,6,7]},
+  {cat:"Landscape"},
+  {c:"Loss of working farms & pasturelands", pri:[0,1,2,3,5,6,7]},
+  {c:"Loss of working forestlands", pri:[3]},
+  {c:"Wetland conservation & management", pri:[4]},
+  {c:"Weather resilience", pri:[2,3]},
+ ]
+};
+
+const GAPS = [
+ {t:"Wildlife exclusion fencing (deer)", p:"The loudest sustained grievance in the room — and pest pressure is one of Epping's two distinctive work-unit primaries — yet the only fencing question (382) keeps livestock out of streams, and slash walls (384) appear only as forestry technique. A NACD national resolution originating from NH LWGs already requests reinstated cost-share.",
+  fb:"Request: add a ranking question crediting vertebrate pest exclusion (deer fencing) where crop/orchard pest-pressure RCs are documented, or credit Woody Residue Treatment (384) slash walls as an exclusion practice, pending the NACD resolution on restoring exclusion-fence cost-share."},
+ {t:"Weather resilience & flood recovery", p:"Carroll and Coös carried weather resilience as a work-unit primary, and this room's 2006 flood story is the cautionary tale — but no question rewards floodplain-aware practices, water-and-sediment control basins (638), or post-flood soil restoration.",
+  fb:"Request: a question crediting practices that increase flood resilience on flood-prone cropland (638, 342, drainage water management), and clearer cross-referral language to FSA disaster programs in outreach."},
+ {t:"Solar, agrivoltaics & electrification", p:"The energy questions reach maple RO units and prescriptive efficiency lists. The room's actual energy conversation — agrivoltaics compatible with grazing, translucent panels, vertical fence-line arrays, electric equipment — has no scoring pathway and collides with easement language.",
+  fb:"Feedback: NH's energy questions don't reflect LWG energy interest (agrivoltaics/electrification). Request STC discussion of a dual-use solar demonstration pathway and easement-compatibility guidance, coordinated with the UNH agrivoltaics research project."},
+ {t:"Farmland protection as a scored outcome", p:"Loss of working lands is primary in seven of eight work units, yet it appears in ranking only as an eligibility fact (existing ALE/FRPP easement) — protection status is noted, not pursued. The room's easement-language and current-use concerns have no channel at all.",
+  fb:"Feedback: consider crediting applications on protected land that maintain agricultural viability, and route easement-language friction (mowing-to-water's-edge conflicts, solar compatibility) to the State Technical Committee and easement holders as a standing agenda item."},
+];
+
+/* ═══════════ SHARED STORAGE ═══════════ */
+const PREFIX="lwgfy27:part:";
+const store = {
+  ok: typeof window!=="undefined" && typeof window.storage!=="undefined",
+  async set(k,v){ if(!this.ok) return false; try{ const r=await window.storage.set(k, JSON.stringify(v), true); return !!r; }catch(e){ console.error(e); return false; } },
+  async get(k){ if(!this.ok) return null; try{ const r=await window.storage.get(k, true); return r?JSON.parse(r.value):null; }catch(e){ return null; } },
+  async list(p){ if(!this.ok) return []; try{ const r=await window.storage.list(p, true); return r?r.keys:[]; }catch(e){ return []; } },
+};
+let me = {name:"", slug:"", r1:{}, r2:{}, comments:[]};   // my record
+let group = [];  // all participant records (incl. me)
+let saveTimer=null;
+const savestat=document.getElementById('savestat');
+function slugify(s){return s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);}
+function scheduleSave(){
+  if(!me.slug) return;
+  savestat.textContent="saving…"; savestat.classList.remove('ok');
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async ()=>{
+    me.ts=Date.now();
+    const ok=await store.set(PREFIX+me.slug, me);
+    savestat.textContent = ok? "saved ✓ (shared board)" : (store.ok? "save failed — retry with any change" : "no shared storage here — session only");
+    savestat.classList.toggle('ok', ok);
+  }, 600);
+}
+async function loadGroup(){
+  if(!store.ok){ group = me.slug? [me] : []; return; }
+  const keys=await store.list(PREFIX);
+  const out=[];
+  for(const k of keys){ const v=await store.get(k); if(v) out.push(v); }
+  // ensure my live edits reflected
+  const idx=out.findIndex(p=>p.slug===me.slug);
+  if(me.slug){ if(idx>=0) out[idx]=me; else out.push(me); }
+  group=out;
+}
+function commentsFor(qid){
+  const all=[];
+  for(const p of group){ for(const c of (p.comments||[])){ if(c.qid===qid) all.push({...c, name:p.name}); } }
+  return all.sort((a,b)=>a.ts-b.ts);
+}
+
+/* ═══════════ HELPERS ═══════════ */
+function pcChips(codes){ return codes.map(c=>`<span class="pc" data-g="${c}" role="button" tabindex="0">${c}</span>`).join(''); }
+function stickerDots(score){
+  let h=''; for(let i=0;i<10;i++){ h+=`<span class="stk ${i<score?(i<Math.min(score,6)?'p':'s'):'o'}"></span>`; }
+  return `<div class="stickerrow" aria-label="${score} of 10">${h}</div>`;
+}
+
+/* ═══════════ RANKINGS TAB ═══════════ */
+const qlist=document.getElementById('qlist'), filters=document.getElementById('filters');
+let activeFilter=null;
+function renderQuestions(){
+  qlist.innerHTML='';
+  for(const tn of [1,2,3,4]){
+    const items=QUESTIONS.filter(q=>q.tier===tn && (!activeFilter||q.themes.includes(activeFilter)));
+    if(!items.length) continue;
+    qlist.insertAdjacentHTML('beforeend',
+      `<div class="tierband"><span class="tno">${tn}</span><span class="tname">${TIERS[tn].name}</span><span class="tdesc">${TIERS[tn].desc}</span></div>`);
+    for(const q of items){
+      const n=commentsFor(q.id).filter(c=>c.share).length;
+      const tags=q.themes.map(t=>`<span class="tag${t===activeFilter?' hit':''}">${t}</span>`).join('')
+        + q.wu.map(w=>`<span class="tag hit">WU primary: ${w}</span>`).join('');
+      qlist.insertAdjacentHTML('beforeend',`
+      <article class="qcard">
+        <div class="score"><span class="big">${q.score}</span><span class="lbl">/ 10</span>${stickerDots(q.score)}</div>
+        <div>
+          <div class="qtitle"><button class="open-q" data-open="${q.id}">${q.t}</button> ${pcChips(q.codes)}${n?`<span class="cmt-count">💬 ${n}</span>`:''}</div>
+          <p class="qwhy">${q.why}</p>
+          <div class="tags">${tags}</div>
+          ${q.quote?`<div class="quote-pull">"${q.quote}"</div>`:''}
+        </div>
+      </article>`);
+    }
+  }
+}
+filters.innerHTML=`<button aria-pressed="true" data-f="">All themes</button>`+THEMES.map(t=>`<button aria-pressed="false" data-f="${t}">${t}</button>`).join('');
+filters.addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return;
+  activeFilter=b.dataset.f||null;
+  filters.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
+  renderQuestions();});
+renderQuestions();
+
+/* ═══════════ MODAL — full question card ═══════════ */
+const veil=document.getElementById('veil'), modalbox=document.getElementById('modalbox');
+let openQid=null, activePrompt=TPROMPTS[0].id;
+function openModal(qid){
+  openQid=qid; activePrompt=TPROMPTS[0].id;
+  renderModal(); veil.classList.add('open'); document.body.style.overflow='hidden';
+}
+function closeModal(){ veil.classList.remove('open'); document.body.style.overflow=''; openQid=null; renderQuestions(); renderVote(); }
+function renderModal(){
+  const q=QUESTIONS.find(x=>x.id===openQid); if(!q) return;
+  const cmts=commentsFor(q.id);
+  const shown=cmts.filter(c=>c.share);
+  const priv=cmts.filter(c=>!c.share).length;
+  const gl=[...new Set(q.codes)].filter(c=>GLOSSARY[c]).map(c=>`<div class="gloss"><b>${c}</b> <b style="color:var(--ink)">${GLOSSARY[c][0]}</b><br><span>${GLOSSARY[c][1]}</span></div>`).join('');
+  modalbox.innerHTML=`
+    <div class="modal-head"><h3>${q.t}</h3><button class="close" aria-label="Close">✕</button></div>
+    <div class="modal-body">
+      <div class="mb-label">Official question — as it appears on the FY27 EQIP survey</div>
+      <div class="official">${q.official}<span class="src">NH NRCS · July 2026 District Report attachment · answer determines CART points</span></div>
+      <div class="mb-label">Answer choices, highest credit first — with plain-language notes</div>
+      <ol class="ansladder">${q.choices.map(c=>`<li>${c[0]}<span class="plain">${c[1]}</span></li>`).join('')}</ol>
+      <div class="mb-label">Practices referenced</div>
+      <div class="gloss-list">${gl||'<div class="gloss"><span>No coded practices — planning/administrative question.</span></div>'}</div>
+      <div class="mb-label">Why it ranks ${q.score}/10 locally</div>
+      <p style="font-size:13.5px">${q.why}</p>
+      ${q.quote?`<div class="quote-pull">"${q.quote}"</div>`:''}
+      <div class="mb-label">Community comments ${priv?`<span style="font-weight:400;text-transform:none;letter-spacing:0">(+${priv} facilitator-only)</span>`:''}</div>
+      ${shown.length? shown.map(c=>`<div class="cmt"><div class="meta"><b>${c.name||'Anonymous'}</b> · ${new Date(c.ts).toLocaleDateString()}<span class="ptag">${(TPROMPTS.find(p=>p.id===c.prompt)||{label:'Comment'}).label}</span></div>${c.text}</div>`).join('')
+        : `<div class="cmt" style="color:var(--ink-soft)">No comments yet — yours starts the record for this question.</div>`}
+      <div class="interview">
+        <div class="ihead">Talk to the Question — pick one prompt, tell it as a story</div>
+        <div class="prompt-pills">${TPROMPTS.map(p=>`<button data-p="${p.id}" aria-pressed="${p.id===activePrompt}">${p.label}</button>`).join('')}</div>
+        <textarea id="cmt-text" placeholder="${(TPROMPTS.find(p=>p.id===activePrompt)||{}).hint||''}"></textarea>
+        <div class="row">
+          <label class="consent"><input type="checkbox" id="cmt-share" checked> Share with the whole board (uncheck = facilitator only)</label>
+          <button class="btn" id="cmt-save">Add comment</button>
+          <span style="font-size:12px;color:var(--ink-soft)">${me.slug?`as <b>${me.name}</b>`:"join the Sticker Board tab with your name to sign comments"}</span>
+        </div>
+      </div>
+    </div>`;
+  modalbox.querySelector('.close').addEventListener('click',closeModal);
+  modalbox.querySelector('.prompt-pills').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return; activePrompt=b.dataset.p;
+    modalbox.querySelectorAll('.prompt-pills button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.p===activePrompt?'true':'false'));
+    modalbox.querySelector('#cmt-text').placeholder=(TPROMPTS.find(p=>p.id===activePrompt)||{}).hint||'';
+  });
+  modalbox.querySelector('#cmt-save').addEventListener('click',async ()=>{
+    const txt=modalbox.querySelector('#cmt-text').value.trim(); if(!txt) return;
+    if(!me.slug){ // auto-anon participant
+      me.name="Anonymous"; me.slug="anon-"+Math.random().toString(36).slice(2,8);
+    }
+    me.comments.push({qid:q.id, prompt:activePrompt, text:txt, share:modalbox.querySelector('#cmt-share').checked, ts:Date.now()});
+    scheduleSave(); await loadGroup(); renderModal();
+  });
+}
+veil.addEventListener('click',e=>{ if(e.target===veil) closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&openQid) closeModal(); });
+
+/* glossary chip popover → open a tiny modal-style alertless inline (reuse modal) */
+document.addEventListener('click',e=>{
+  const pc=e.target.closest('.pc');
+  if(pc){ const g=GLOSSARY[pc.dataset.g];
+    if(g){ // lightweight: toast-style card near top of modal or as mini modal
+      openGloss(pc.dataset.g,g); }
+    return;
+  }
+  const op=e.target.closest('[data-open]');
+  if(op){ openModal(op.dataset.open); }
+});
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('pc')){e.preventDefault();e.target.click();}
+});
+function openGloss(code,g){
+  if(openQid){ // inside modal: flash-highlight matching gloss row
+    const rows=modalbox.querySelectorAll('.gloss b');
+    for(const b of rows){ if(b.textContent===code){ b.closest('.gloss').style.borderColor='var(--spruce)'; b.closest('.gloss').scrollIntoView({block:'center'}); setTimeout(()=>{b.closest('.gloss').style.borderColor='';},1500); return; } }
+  }
+  veil.classList.add('open'); document.body.style.overflow='hidden'; openQid='__gloss';
+  modalbox.innerHTML=`<div class="modal-head"><h3><span class="mono" style="font-size:15px">${code}</span> — ${g[0]}</h3><button class="close" aria-label="Close">✕</button></div>
+    <div class="modal-body"><p style="font-size:14.5px">${g[1]}</p>
+    <p style="font-size:12.5px;color:var(--ink-soft);margin-top:12px">Appears in: ${QUESTIONS.filter(q=>q.codes.includes(code)).map(q=>`<button class="open-q" style="appearance:none;border:none;background:none;font:inherit;color:var(--spruce);cursor:pointer;text-decoration:underline" data-open="${q.id}">${q.t}</button>`).join(' · ')||'—'}</p></div>`;
+  modalbox.querySelector('.close').addEventListener('click',closeModal);
+}
+
+/* ═══════════ CROSSWALK ═══════════ */
+const vEl=document.getElementById('voices'), cEl=document.getElementById('concerns'), qEl=document.getElementById('xqs');
+const xwQids=[...new Set(XW.concerns.flatMap(c=>c.qs))];
+vEl.innerHTML=XW.voices.map(v=>`<div class="chip voice" data-v="${v.id}" tabindex="0">"${v.q}"<span class="who">${v.who}</span></div>`).join('');
+cEl.innerHTML=XW.concerns.map(c=>`<div class="chip concern" data-c="${c.id}" tabindex="0"><span class="cdot" style="background:${c.color}"></span>${c.label}</div>`).join('');
+qEl.innerHTML=xwQids.map(id=>{const q=QUESTIONS.find(x=>x.id===id);
+  return `<div class="chip q" data-q="${id}" tabindex="0">${q.t}<br><span class="code2">${q.codes.join(' · ')} · score ${q.score}</span></div>`}).join('');
+let sel=null;
+function clearX(){document.querySelectorAll('#xwalk .chip').forEach(ch=>ch.classList.remove('on','dim')); sel=null;}
+document.getElementById('xwalk').addEventListener('click',e=>{
+  const ch=e.target.closest('.chip'); if(!ch)return;
+  if(ch.dataset.q && sel===ch.dataset.q){ openModal(ch.dataset.q); clearX(); return; }
+  let cids=[];
+  if(ch.dataset.c) cids=[ch.dataset.c];
+  else if(ch.dataset.v) cids=XW.concerns.filter(c=>c.voices.includes(ch.dataset.v)).map(c=>c.id);
+  else if(ch.dataset.q) cids=XW.concerns.filter(c=>c.qs.includes(ch.dataset.q)).map(c=>c.id);
+  const key=ch.dataset.c||ch.dataset.v||ch.dataset.q;
+  if(sel===key && !ch.dataset.q){clearX();return;}
+  sel=key;
+  document.querySelectorAll('#xwalk .chip').forEach(x=>{
+    const on = (x===ch) || cids.includes(x.dataset.c) || cids.some(cid=>{const c=XW.concerns.find(y=>y.id===cid); return c.voices.includes(x.dataset.v)||c.qs.includes(x.dataset.q);});
+    x.classList.toggle('on',on); x.classList.toggle('dim',!on);
+  });
+});
+document.getElementById('xwalk').addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('chip')){e.preventDefault();e.target.click();}
+});
+
+/* ═══════════ HEATMAP ═══════════ */
+const hmT=document.getElementById('hmtable');
+let hh=`<tr><th class="rowh">Primary concern</th>`+HM.units.map((u,i)=>`<th class="${HM.you.includes(i)?'you':''}">${u}</th>`).join('')+`</tr>`;
+for(const r of HM.rows){
+  if(r.cat){hh+=`<tr><td class="cat" colspan="${HM.units.length+1}">${r.cat}</td></tr>`;continue;}
+  hh+=`<tr><td class="rowh">${r.c}</td>`+HM.units.map((u,i)=>`<td class="${HM.you.includes(i)?'you':''}">${r.pri.includes(i)?'<span class="pri">P</span>':''}</td>`).join('')+`</tr>`;
+}
+hmT.innerHTML=hh;
+
+/* ═══════════ GAPS ═══════════ */
+document.getElementById('gaplist').innerHTML=GAPS.map(g=>`
+  <div class="gapcard"><h3>${g.t}</h3><p>${g.p}</p>
+  <div class="fb"><b>Draft for the "Additional Feedback" field</b>${g.fb}</div></div>`).join('');
+
+/* ═══════════ TWO-ROUND VOTE ═══════════ */
+const VOTE_Q=QUESTIONS.filter(q=>q.tier<=3);
+const MAXP=3, MAXS=3, MAXDOTS=10, MAXPERQ=3;
+let round=1;
+const vrows=document.getElementById('vrows'), bankbar=document.getElementById('bankbar');
+function usedP(){return Object.values(me.r1).filter(v=>v==='P').length;}
+function usedS(){return Object.values(me.r1).filter(v=>v==='S').length;}
+function usedDots(){return Object.values(me.r2).reduce((a,b)=>a+b,0);}
+function renderVote(){
+  if(round===1){
+    bankbar.innerHTML=`<span class="vlbl">Primary bank</span><div class="bank">${Array.from({length:MAXP},(_,i)=>`<span class="bstk ${i<MAXP-usedP()?'p':'spent'}">P</span>`).join('')}</div>
+      <span class="vlbl">Secondary bank</span><div class="bank">${Array.from({length:MAXS},(_,i)=>`<span class="bstk ${i<MAXS-usedS()?'s':'spent'}">S</span>`).join('')}</div>
+      <button class="btn ghost" id="vreset">Clear Round 1</button>`;
+  } else {
+    bankbar.innerHTML=`<span class="vlbl">Dot bank — spend after reading the full questions &amp; comments</span>
+      <div class="bank">${Array.from({length:MAXDOTS},(_,i)=>`<span class="bstk ${i<MAXDOTS-usedDots()?'g':'spent'}">•</span>`).join('')}</div>
+      <span style="font-size:12px;color:var(--ink-soft)">max ${MAXPERQ} per question</span>
+      <button class="btn ghost" id="vreset">Clear Round 2</button>`;
+  }
+  bankbar.querySelector('#vreset').addEventListener('click',()=>{ if(round===1) me.r1={}; else me.r2={}; scheduleSave(); renderVote(); });
+  vrows.innerHTML=VOTE_Q.map(q=>{
+    const controls = round===1
+      ? `<div class="vbtns">
+          <button class="stkbtn ${me.r1[q.id]==='P'?'pon':''}" data-id="${q.id}" data-k="P" aria-label="Primary sticker for ${q.t}">P</button>
+          <button class="stkbtn ${me.r1[q.id]==='S'?'son':''}" data-id="${q.id}" data-k="S" aria-label="Secondary sticker for ${q.t}">S</button>
+         </div>`
+      : `<div class="dotctl">
+          <button data-id="${q.id}" data-d="-1" aria-label="Remove dot from ${q.t}">−</button>
+          <span class="dots">${Array.from({length:me.r2[q.id]||0},()=>'<span class="d"></span>').join('')||'<span style="font-size:11px;color:var(--ink-soft)">0</span>'}</span>
+          <button data-id="${q.id}" data-d="1" aria-label="Add dot to ${q.t}">+</button>
+         </div>`;
+    return `<div class="vrow"><span class="vcat">${q.themes[0]}</span>
+      <span class="vname"><button data-open="${q.id}" title="Read the full question">${q.t}</button></span>${controls}</div>`;
+  }).join('');
+  renderTally();
+}
+vrows.addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b||b.dataset.open)return;
+  if(round===1 && b.dataset.k){
+    const {id,k}=b.dataset;
+    if(me.r1[id]===k){ delete me.r1[id]; }
+    else { if((k==='P'?usedP():usedS()) >= (k==='P'?MAXP:MAXS)) return; me.r1[id]=k; }
+  } else if(round===2 && b.dataset.d){
+    const id=b.dataset.id, d=+b.dataset.d, cur=me.r2[id]||0;
+    if(d>0 && (usedDots()>=MAXDOTS || cur>=MAXPERQ)) return;
+    const nv=Math.max(0,cur+d);
+    if(nv===0) delete me.r2[id]; else me.r2[id]=nv;
+  } else return;
+  scheduleSave(); renderVote();
+});
+document.querySelector('.roundtabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  round=+b.dataset.r;
+  document.querySelectorAll('.roundtabs button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
+  renderVote();
+});
+async function renderTally(){
+  const t=document.getElementById('tally');
+  const agg={};
+  for(const q of VOTE_Q) agg[q.id]={p:0,s:0,d:0};
+  for(const part of group){
+    for(const [qid,k] of Object.entries(part.r1||{})){ if(agg[qid]) agg[qid][k==='P'?'p':'s']++; }
+    for(const [qid,n] of Object.entries(part.r2||{})){ if(agg[qid]) agg[qid].d+=n; }
+  }
+  const rows=VOTE_Q.map(q=>({q, ...agg[q.id], w: agg[q.id].p*3+agg[q.id].s+agg[q.id].d}))
+    .filter(r=>r.w>0).sort((a,b)=>b.w-a.w);
+  const np=group.length;
+  t.innerHTML=`<h3>Group tally — ${np||'no'} participant${np===1?'':'s'} on the board</h3>
+    <div class="tsub">Weighted P=3 · S=1 · dot=1. Round-2 dots that pile onto un-stickered questions are the deliberation signal: those questions read better than they title.</div>
+    ${rows.length? rows.map(r=>`<div class="trow"><span class="tname">${r.q.t}</span>
+      <span class="bars">${r.p?`<span class="b bp" style="width:${r.p*22}px" title="${r.p} P"></span>`:''}${r.s?`<span class="b bs" style="width:${r.s*10}px" title="${r.s} S"></span>`:''}${r.d?`<span class="b bg2" style="width:${r.d*10}px" title="${r.d} dots"></span>`:''}</span>
+      <span class="tn">${r.p}P · ${r.s}S · ${r.d}•</span></div>`).join('')
+     : `<div class="tsub">No stickers placed yet.</div>`}
+    <button class="btn ghost refresh" id="regroup" style="border-color:#9FD3AE;color:#9FD3AE">↻ Refresh group results</button>`;
+  t.querySelector('#regroup').addEventListener('click',async ()=>{ await loadGroup(); renderTally(); renderQuestions(); });
+}
+document.getElementById('join').addEventListener('click',async ()=>{
+  const n=document.getElementById('pname').value.trim(); if(!n) return;
+  const slug=slugify(n);
+  const existing=await store.get(PREFIX+slug);
+  me = existing || {name:n, slug, r1:{}, r2:{}, comments:[]};
+  me.name=n; me.slug=slug;
+  savestat.textContent = store.ok? "joined — changes save automatically" : "no shared storage in this view — session only";
+  savestat.classList.toggle('ok', store.ok);
+  await loadGroup(); renderVote(); renderQuestions();
+});
+
+/* ═══════════ TABS + INIT ═══════════ */
+document.querySelector('nav').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b?'true':'false'));
+  document.querySelectorAll('main > section').forEach(s=>s.hidden=s.id!==b.dataset.tab);
+  window.scrollTo({top:0});
+});
+(async ()=>{ await loadGroup(); renderVote(); renderQuestions(); })();
+</script>
+</body>
+</html>
